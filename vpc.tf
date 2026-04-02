@@ -1,3 +1,6 @@
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   instance_tenancy     = "default"
@@ -11,8 +14,8 @@ resource "aws_vpc" "main" {
 
 resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
+  cidr_block              = var.public_subnet_cidr
+  availability_zone       = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = true
 
   tags = {
@@ -22,8 +25,8 @@ resource "aws_subnet" "public" {
 
 resource "aws_subnet" "public2" {
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.2.0/24"
-  availability_zone       = "us-east-1b"
+  cidr_block              = var.public2_subnet_cidr
+  availability_zone       = data.aws_availability_zones.available.names[1]
   map_public_ip_on_launch = true
 
   tags = {
@@ -33,11 +36,21 @@ resource "aws_subnet" "public2" {
 
 resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.0.3.0/24"
-  availability_zone = "us-east-1a"
+  cidr_block        = var.private_subnet_cidr
+  availability_zone = data.aws_availability_zones.available.names[0]
 
   tags = {
     Name = "private-subnet"
+  }
+}
+
+resource "aws_subnet" "private2" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.private2_subnet_cidr
+  availability_zone = data.aws_availability_zones.available.names[1]
+
+  tags = {
+    Name = "private-subnet2"
   }
 }
 
